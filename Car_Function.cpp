@@ -9,42 +9,10 @@
 
 #include "Random.h"
 #include "Class.h"
+#include "Define.h"
 using namespace std;
 
 // 绘制变道轨迹（红色虚线）
-void Vehicle::drawLaneChangePath() const
-{
-    if (isChangingLane)
-    {
-        setlinecolor(RED);
-        setlinestyle(PS_DASH, 1);
-
-        // 使用固定的渐入渐出贝塞尔曲线绘制轨迹
-        int prevX = startX;
-        int prevY = startY;
-
-        for (float t = 0; t <= 1; t += 0.05)
-        {
-            // 使用相同的S型曲线计算垂直位置
-            float verticalSpeed = 3 * t * t - 2 * t * t * t;
-            float deltaY = (endY - startY) * verticalSpeed;
-            int currentY = startY + (int)deltaY;
-
-            // 水平方向是匀速的，所以x位置是线性变化的
-            int currentX = startX + (int)((endX - startX) * t);
-
-            if (t > 0)
-            {
-                line(prevX, prevY, currentX, currentY);
-            }
-
-            prevX = currentX;
-            prevY = currentY;
-        }
-
-        setlinestyle(PS_SOLID, 1);
-    }
-}
 // 平滑变道函数
 bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle> &allVehicles)
 {
@@ -249,10 +217,10 @@ bool Vehicle::isLaneChangeSafe(int laneHeight, const vector<Vehicle> &allVehicle
 }
 
 // 检查与前车距离
-void Vehicle::checkFrontVehicleDistance(const vector<Vehicle> &allVehicles, int safeDistance)
+void Vehicle::checkFrontVehicleDistance(vector<Vehicle> &allVehicles, int safeDistance)
 {
     // 遍历所有车辆，寻找同一车道的前方车辆
-    for (const auto &other : allVehicles)
+    for (auto &other : allVehicles)
     {
         // 跳过自己
         if (&other == this)
@@ -317,38 +285,40 @@ void Vehicle::checkFrontVehicleDistance(const vector<Vehicle> &allVehicles, int 
             else
             {
                 // 如果相对速度大于CRASH，调用危险处理函数
-                handleDangerousSituation();
+                handleDangerousSituation(*this);
+                handleDangerousSituation(other);
             }
-
             return; // 找到最近的前车后即可返回
         }
     }
 }
 
 // 显示橘色线框
-void Vehicle::showFlashingFrame(int flashCount) {
+void Vehicle::showFlashingFrame()
+{
     // 保存当前线型和颜色
-    LINESTYLE oldLineStyle ;
+    LINESTYLE oldLineStyle;
     getlinestyle(&oldLineStyle);
     COLORREF oldLineColor = getlinecolor();
-    
+
     // 设置橘色线框
     setlinecolor(RGB(255, 165, 0)); // 橙色
     setlinestyle(PS_SOLID, 2);      // 实线，线宽为2
 
     // 绘制车辆周围的橘色线框
-    rectangle(x - carlength / 2 - 5, y - carwidth / 2 - 5, 
+    rectangle(x - carlength / 2 - 5, y - carwidth / 2 - 5,
               x + carlength / 2 + 5, y + carwidth / 2 + 5);
-        
+
     // 恢复原来的线型和颜色
     setlinestyle(oldLineStyle.style, oldLineStyle.thickness);
     setlinecolor(oldLineColor);
 }
 
 // 处理危险情况
-void Vehicle::handleDangerousSituation() {
-    // 将车辆颜色变为红色，表示危险
-    color = RGB(255, 0, 0);
-    // 显示闪烁的橘色线框
-    showFlashingFrame();
+void Vehicle::handleDangerousSituation(Vehicle &self)
+{
+    // 设置车辆为抛锚状态
+    self.isBrokenDown = true;
+    // 将车辆速度设为0
+    self.speed = 0;
 }

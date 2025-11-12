@@ -30,6 +30,9 @@ int main()
     vector<Vehicle> vehicles;
     srand(unsigned int(time(0)));
     double time = 0;
+    // 车辆长宽的分布，随机数取值
+    normal_distribution<> normalwidth(3, 0.1);  // 车的宽度  这里用了正态分布
+    normal_distribution<> normallength(6, 0.1); // 车辆长度  这里用了正态分布
 
     while (!_kbhit())
     {
@@ -89,7 +92,8 @@ int main()
                 0,                                            // endX
                 0,                                            // endY
                 false,                                        // isTooClose
-                RGB(rand() % 256, rand() % 256, rand() % 256) // originalColor
+                RGB(rand() % 256, rand() % 256, rand() % 256), // originalColor
+                false                                         // isBrokenDown
             });
         }
 
