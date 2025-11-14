@@ -36,13 +36,14 @@ void drawDashedLine(int x1, int y1, int x2, int y2)
     }
 }
 
-// 绘制轨迹（红色虚线）
-void VirtualVehicle::drawTrajectory() const
+// 绘制轨迹（根据安全情况使用不同颜色）
+void VirtualVehicle::drawTrajectory(bool isSafe) const
 {
     if (trajectory.size() < 2)
         return;
 
-    setlinecolor(RED);
+    // 根据安全情况设置颜色：安全使用蓝色，不安全使用红色
+    setlinecolor(isSafe ? BLUE : RED);
     setlinestyle(PS_DASH, 1);
 
     for (size_t i = 1; i < trajectory.size(); ++i)

@@ -10,12 +10,15 @@
 #include "Random.h"
 #include "Class.h"
 #include "Define.h"
+#include "VehicleTypes.h"
 using namespace std;
 
 // 函数声明：清除指定车道的所有车辆
-void clearLane(vector<Vehicle>& vehicles, int lane) {
+void clearLane(vector<Vehicle> &vehicles, int lane)
+{
     vehicles.erase(remove_if(vehicles.begin(), vehicles.end(),
-                             [lane](const Vehicle& v) {
+                             [lane](const Vehicle &v)
+                             {
                                  return v.lane == lane;
                              }),
                    vehicles.end());
@@ -78,27 +81,31 @@ int main()
             int buttonY = laneHeight * i + (int)(0.5 * laneHeight) - (int)(laneHeight / 4);
             int buttonWidth = 40;
             int buttonHeight = (int)(laneHeight / 2);
-            
+
             // 设置按钮颜色
-            setfillcolor(RGB(70, 70, 70)); // 深灰色背景
+            setfillcolor(RGB(70, 70, 70));    // 深灰色背景
             setlinecolor(RGB(200, 200, 200)); // 浅灰色边框
             fillrectangle(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight);
-            
+
             // 绘制箭头
             settextstyle((int)(laneHeight / 2), 0, L"Arial");
             settextcolor(WHITE);
             outtextxy(buttonX + 10, buttonY, i < laneCount / 2 ? L"→" : L"←");
         }
-        
+
         // 检查鼠标点击
-        if (MouseHit()) {
+        if (MouseHit())
+        {
             MOUSEMSG msg = GetMouseMsg();
-            if (msg.uMsg == WM_LBUTTONDOWN) {
+            if (msg.uMsg == WM_LBUTTONDOWN)
+            {
                 // 检查点击是否在按钮区域
-                if (msg.x < 45) {
+                if (msg.x < 45)
+                {
                     // 计算点击所在的车道
                     int clickedLane = msg.y / laneHeight;
-                    if (clickedLane >= 0 && clickedLane < laneCount) {
+                    if (clickedLane >= 0 && clickedLane < laneCount)
+                    {
                         // 清除该车道上的所有车辆
                         clearLane(vehicles, clickedLane);
                     }
@@ -111,33 +118,70 @@ int main()
         {                          // 判断要不要产生新的一辆车
             int lane = rand() % 6; // 如果有车，车辆的随机位置
 
-            // 随机的车辆长与宽
+            // 检查新车位置是否安全
+            int newX = lane < 3 ? 0 : windowWidth;
+            int newY = laneHeight * lane + (int)(0.5 * laneHeight);
+            bool isPositionSafe = true;
             int carwidth = RandomGenerator{normalwidth}() * scale * bridge.widthScale;
             int carlength = RandomGenerator{normallength}() * scale;
 
-            vehicles.push_back(Vehicle{
-                // 桥梁上所有车子存放在vehicles里面，
-                // 添加行车
-                lane,
-                carlength,
-                carwidth,
-                lane < 3 ? 0 : windowWidth,
-                laneHeight * lane + (int)(0.5 * laneHeight),
-                (int)rng.generate(),
-                false,
-                RGB(rand() % 256, rand() % 256, rand() % 256),
-                false,                                         // isChangingLane
-                false,
-                0,                                             // targetLane
-                0.0f,                                          // changeProgress
-                0,                                             // startX
-                0,                                             // startY
-                0,                                             // endX
-                0,                                             // endY
-                false,                                         // isTooClose
-                RGB(rand() % 256, rand() % 256, rand() % 256), // originalColor
-                false                                          // isBrokenDown
-            });
+            // 检查与现有车辆的距离
+            for (const auto &existingVehicle : vehicles)
+            {
+                // 只检查同一车道的车辆
+                if (existingVehicle.lane != lane)
+                    continue;
+
+                // 计算两车之间的距离
+                int distance = abs(existingVehicle.x - newX) - (existingVehicle.carlength / 2 + carlength / 2);
+
+                // 如果距离小于安全距离，位置不安全
+                if (distance < SAFE_DISTANCE)
+                {
+                    isPositionSafe = false;
+                    break;
+                }
+            }
+
+            // 只有在位置安全时才添加新车
+            if (isPositionSafe)
+            {
+                // 随机选择车辆类型：0-小轿车，1-SUV，2-大卡车
+                int vehicleType = rand() % 3;
+                if (vehicleType == 0)
+                {
+                    // 创建小轿车
+                    vehicles.push_back(Sedan(
+                        lane,
+                        carlength,
+                        carwidth,
+                        lane < 3 ? 0 : windowWidth,
+                        laneHeight * lane + (int)(0.5 * laneHeight),
+                        (int)rng.generate()));
+                }
+                else if (vehicleType == 1)
+                {
+                    // 创建SUV
+                    vehicles.push_back(SUV(
+                        lane,
+                        carlength,
+                        carwidth,
+                        lane < 3 ? 0 : windowWidth,
+                        laneHeight * lane + (int)(0.5 * laneHeight),
+                        (int)rng.generate()));
+                }
+                else
+                {
+                    // 创建大卡车
+                    vehicles.push_back(Truck(
+                        lane,
+                        carlength,
+                        carwidth,
+                        lane < 3 ? 0 : windowWidth,
+                        laneHeight * lane + (int)(0.5 * laneHeight),
+                        (int)rng.generate()));
+                }
+            }
         }
 
         // 更新车辆的位置
@@ -147,12 +191,13 @@ int main()
         {
             // 保存原始颜色（如果还没有被标记为警告）
             COLORREF originalColor = v.color;
-            if (v.speed==0) {
+            if (v.speed == 0)
+            {
                 v.handleDangerousSituation();
             }
             // 使用前向运动函数
             v.moveForward(middleY);
-            v.checkFrontVehicleDistance(vehicles, SAFE_DISTANCE); // 检查与前车距离
+            v.checkFrontVehicleDistance(vehicles, v.getSafeDistance()); // 检查与前车距离，使用车辆特定的安全距离
 
             if (v.isGoing2change)
             {
@@ -161,7 +206,6 @@ int main()
                     v.haschanged = true;
                 }
             }
-           
 
             // 如果处于警告状态，检查是否需要恢复
             if (v.isTooClose)
@@ -207,8 +251,8 @@ int main()
         // 绘制车辆
         for (const auto &v : vehicles)
         {
-            v.predictAndDrawTrajectory(laneHeight, windowHeight / 2); // 预测并绘制轨迹
-            v.draw();                                                 // 绘制车辆
+            v.predictAndDrawTrajectory(laneHeight, windowHeight / 2, 30, vehicles); // 预测并绘制轨迹
+            v.draw();                                                               // 绘制车辆
         }
 
         Sleep(60); // ms
