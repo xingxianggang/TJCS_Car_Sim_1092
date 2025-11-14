@@ -12,6 +12,7 @@
 #include "Class.h"
 #include "Define.h"
 #include "VehicleTypes.h"
+#include "BridgeLightingControl.h"
 using namespace std;
 
 
@@ -35,9 +36,37 @@ int main()
     uniform_int_distribution<int> int_dist(20, 120);
     RandomGenerator rng(int_dist);
     
-    while (!_kbhit())
+    // 创建天气效果管理器
+    WeatherEffectManager weatherManager(windowWidth, windowHeight);
+    
+    // 定义天气按钮位置和尺寸
+    const int btnWidth = 80;
+    const int btnHeight = 35;
+    const int btnSpacing = 10;
+    const int btnStartX = windowWidth - 300;
+    const int btnStartY = 70;
+    
+    // 三个按钮的矩形区域
+    struct ButtonRect {
+        int x1, y1, x2, y2;
+        WeatherMode mode;
+        const wchar_t* text;
+    };
+    
+    ButtonRect weatherButtons[3] = {
+        {btnStartX, btnStartY, btnStartX + btnWidth, btnStartY + btnHeight, NOTHING, L"正常"},
+        {btnStartX + btnWidth + btnSpacing, btnStartY, btnStartX + 2 * btnWidth + btnSpacing, btnStartY + btnHeight, RAIN, L"下雨"},
+        {btnStartX + 2 * (btnWidth + btnSpacing), btnStartY, btnStartX + 3 * btnWidth + 2 * btnSpacing, btnStartY + btnHeight, SNOW, L"下雪"}
+    };
+    
+    bool running = true;
+    
+    while (running)
     {
         cleardevice();
+        
+        // 绘制天气效果（在最底层）
+        weatherManager.update();
         
         // 显示桥的参数信息
         wchar_t info[256];
@@ -51,6 +80,49 @@ int main()
         swprintf_s(info2, L"时间： %.0fs", time);
         settextstyle(20, 0, L"Arial");
         outtextxy(windowWidth - 150, 10, info2);
+        
+        // 显示当前天气状态
+        wchar_t weatherInfo[128];
+        WeatherMode currentWeather = weatherManager.getCurrentWeather();
+        const wchar_t* weatherText = L"正常";
+        if (currentWeather == RAIN) weatherText = L"下雨";
+        else if (currentWeather == SNOW) weatherText = L"下雪";
+        swprintf_s(weatherInfo, L"当前天气： %s", weatherText);
+        settextstyle(20, 0, L"Arial");
+        outtextxy(btnStartX, 40, weatherInfo);
+        
+        // 绘制天气控制按钮
+        for (int i = 0; i < 3; i++)
+        {
+            // 判断是否是当前选中的天气
+            bool isActive = (weatherButtons[i].mode == currentWeather);
+            
+            // 设置按钮颜色：选中的按钮高亮
+            if (isActive)
+            {
+                setfillcolor(RGB(0, 120, 215));  // 蓝色高亮
+                setlinecolor(RGB(0, 84, 153));
+            }
+            else
+            {
+                setfillcolor(RGB(70, 70, 70));   // 灰色
+                setlinecolor(RGB(200, 200, 200));
+            }
+            
+            // 绘制按钮矩形
+            fillroundrect(weatherButtons[i].x1, weatherButtons[i].y1, 
+                         weatherButtons[i].x2, weatherButtons[i].y2, 8, 8);
+            
+            // 绘制按钮文字
+            settextstyle(22, 0, L"Arial");
+            settextcolor(WHITE);
+            setbkmode(TRANSPARENT);
+            
+            // 计算文字居中位置
+            int textX = weatherButtons[i].x1 + (btnWidth - textwidth(weatherButtons[i].text)) / 2;
+            int textY = weatherButtons[i].y1 + (btnHeight - textheight(weatherButtons[i].text)) / 2;
+            outtextxy(textX, textY, weatherButtons[i].text);
+        }
 
         // 绘制车道
         setlinecolor(WHITE);
@@ -62,7 +134,7 @@ int main()
             drawDashedLine(0, (i + 1) * laneHeight, windowWidth, (i + 1) * laneHeight);
         }
         
-        // 绘制箭头和可视化按钮
+        // 绘制车道清除按钮（改为圆角）
         for (int i = 0; i < laneCount; ++i)
         {
             int buttonX = 5;
@@ -70,12 +142,17 @@ int main()
             int buttonWidth = 40;
             int buttonHeight = (int)(laneHeight / 2);
 
+            // 使用与天气按钮相同的灰色主题
             setfillcolor(RGB(70, 70, 70));
             setlinecolor(RGB(200, 200, 200));
-            fillrectangle(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight);
+            
+            // 改为圆角矩形！
+            fillroundrect(buttonX, buttonY, buttonX + buttonWidth, buttonY + buttonHeight, 8, 8);
 
+            // 绘制箭头文字
             settextstyle((int)(laneHeight / 2), 0, L"Arial");
             settextcolor(WHITE);
+            setbkmode(TRANSPARENT);
             outtextxy(buttonX + 10, buttonY, i < laneCount / 2 ? L"→" : L"←");
         }
 
@@ -85,6 +162,7 @@ int main()
             MOUSEMSG msg = GetMouseMsg();
             if (msg.uMsg == WM_LBUTTONDOWN)
             {
+                // 检查是否点击车道清除按钮
                 if (msg.x < 45)
                 {
                     int clickedLane = msg.y / laneHeight;
@@ -93,6 +171,35 @@ int main()
                         clearLane(vehicles, clickedLane);
                     }
                 }
+                
+                // 检查是否点击天气按钮
+                for (int i = 0; i < 3; i++)
+                {
+                    if (msg.x >= weatherButtons[i].x1 && msg.x <= weatherButtons[i].x2 &&
+                        msg.y >= weatherButtons[i].y1 && msg.y <= weatherButtons[i].y2)
+                    {
+                        weatherManager.setWeather(weatherButtons[i].mode);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // 保留键盘快捷键（可选）
+        if (_kbhit())
+        {
+            char key = _getch();
+            if (key == 'r' || key == 'R') {
+                weatherManager.setWeather(RAIN);
+            }
+            else if (key == 's' || key == 'S') {
+                weatherManager.setWeather(SNOW);
+            }
+            else if (key == 'n' || key == 'N') {
+                weatherManager.setWeather(NOTHING);
+            }
+            else if (key == 27 || key == 'q' || key == 'Q') {
+                running = false;
             }
         }
 
@@ -223,7 +330,7 @@ int main()
             remove_if(vehicles.begin(), vehicles.end(),
                 [windowWidth](Vehicle* v) {
                     if (v->x < 0 || v->x > windowWidth) {
-                        delete v;  // 释放内存
+                        delete v;
                         return true;
                     }
                     return false;
