@@ -14,38 +14,37 @@
 #include "VehicleTypes.h"
 using namespace std;
 
-
 int main()
 {
     Bridge bridge;
     bridge.bridgeLength = 100;
     bridge.bridgeWidth = 50;
     bridge.widthScale = 1;
-    
+
     int windowWidth, windowHeight;
     double scale;
     bridge.calculateWindowSize(windowWidth, windowHeight, scale);
 
-    vector<Vehicle*> vehicles;
+    vector<Vehicle *> vehicles;
     srand(unsigned int(time(0)));
     double time = 0;
-    
+
     normal_distribution<> normalwidth(3, 0.1);
     normal_distribution<> normallength(6, 0.1);
     uniform_int_distribution<int> int_dist(20, 120);
     RandomGenerator rng(int_dist);
-    
+
     while (!_kbhit())
     {
         cleardevice();
-        
+
         // 显示桥的参数信息
         wchar_t info[256];
-        swprintf_s(info, L"桥长： %.0fm  桥宽：%.0fm  桥宽放大率： %.1f", 
-                  bridge.bridgeLength, bridge.bridgeWidth, bridge.widthScale);
+        swprintf_s(info, L"桥长： %.0fm  桥宽：%.0fm  桥宽放大率： %.1f",
+                   bridge.bridgeLength, bridge.bridgeWidth, bridge.widthScale);
         settextstyle(20, 0, L"Arial");
         outtextxy(10, 10, info);
-        
+
         // 显示时间
         wchar_t info2[256];
         swprintf_s(info2, L"时间： %.0fs", time);
@@ -61,7 +60,7 @@ int main()
         {
             drawDashedLine(0, (i + 1) * laneHeight, windowWidth, (i + 1) * laneHeight);
         }
-        
+
         // 绘制箭头和可视化按钮
         for (int i = 0; i < laneCount; ++i)
         {
@@ -106,13 +105,13 @@ int main()
             int carwidth = RandomGenerator{normalwidth}() * scale * bridge.widthScale;
             int carlength = RandomGenerator{normallength}() * scale;
 
-            for (const auto& existingVehicle : vehicles)
+            for (const auto &existingVehicle : vehicles)
             {
                 if (existingVehicle->lane != lane)
                     continue;
 
-                int distance = abs(existingVehicle->x - newX) - 
-                             (existingVehicle->carlength / 2 + carlength / 2);
+                int distance = abs(existingVehicle->x - newX) -
+                               (existingVehicle->carlength / 2 + carlength / 2);
 
                 if (distance < SAFE_DISTANCE)
                 {
@@ -124,8 +123,8 @@ int main()
             if (isPositionSafe)
             {
                 int vehicleType = rand() % 3;
-                Vehicle* newVehicle = nullptr;
-                
+                Vehicle *newVehicle = nullptr;
+
                 if (vehicleType == 0)
                 {
                     newVehicle = new Sedan(
@@ -156,8 +155,9 @@ int main()
                         newY,
                         (int)rng.generate());
                 }
-                
-                if (newVehicle) {
+
+                if (newVehicle)
+                {
                     vehicles.push_back(newVehicle);
                 }
             }
@@ -166,39 +166,19 @@ int main()
         // 更新车辆的位置
         int middleY = windowHeight / 2;
 
-        for (auto& v : vehicles)
+        for (auto &v : vehicles)
         {
             COLORREF originalColor = v->color;
             if (v->speed == 0)
             {
                 v->handleDangerousSituation();
             }
-            
+
             v->moveForward(middleY);
             v->checkFrontVehicleDistance(vehicles, v->getSafeDistance());
 
             if (v->isGoing2change)
-            {   if(typeid(*v) == typeid(Sedan))
-                {
-                    if (v->smoothLaneChange(laneHeight, vehicles,Sedan_curve))
-                    {
-                        v->haschanged = true;
-                    }
-                }
-                else if(typeid(*v) == typeid(SUV))
-                {
-                    if (v->smoothLaneChange(laneHeight, vehicles,SUV_curve))
-                    {
-                        v->haschanged = true;
-                    }
-                }
-                else if(typeid(*v) == typeid(Truck))
-                {
-                    if (v->smoothLaneChange(laneHeight, vehicles,Truck_curve))
-                    {
-                        v->haschanged = true;
-                    }
-                }
+            {
                 if (v->smoothLaneChange(laneHeight, vehicles))
                 {
                     v->haschanged = true;
@@ -220,8 +200,8 @@ int main()
 
                     if (isFrontVehicle)
                     {
-                        int distance = abs(other->x - v->x) - 
-                                     (other->carlength / 2 + v->carlength / 2);
+                        int distance = abs(other->x - v->x) -
+                                       (other->carlength / 2 + v->carlength / 2);
                         if (distance <= SAFE_DISTANCE)
                         {
                             stillTooClose = true;
@@ -241,18 +221,21 @@ int main()
         // 移除离开车辆并释放内存
         vehicles.erase(
             remove_if(vehicles.begin(), vehicles.end(),
-                [windowWidth](Vehicle* v) {
-                    if (v->x < 0 || v->x > windowWidth) {
-                        delete v;  // 释放内存
-                        return true;
-                    }
-                    return false;
-                }),
+                      [windowWidth](Vehicle *v)
+                      {
+                          if (v->x < 0 || v->x > windowWidth)
+                          {
+                              delete v; // 释放内存
+                              return true;
+                          }
+                          return false;
+                      }),
             vehicles.end());
         // 绘制车辆
-        for (const auto& v : vehicles)
+        for (const auto &v : vehicles)
         {
             v->predictAndDrawTrajectory(laneHeight, windowHeight / 2, 30, vehicles);
+
             v->draw();
         }
 

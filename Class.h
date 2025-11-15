@@ -1,4 +1,4 @@
-﻿#include <graphics.h>
+#include <graphics.h>
 #include <vector>
 #include <ctime>
 #include <conio.h> // 需要包含此头文件_kbhit()函数需要
@@ -16,7 +16,9 @@ enum class VehicleType
     SUV,   // SUV
     TRUCK  // 大卡车
 };
-
+int Sedan_curve(int t);
+int SUV_curve(int t);
+int Truck_curve(int t);
 // 定义车辆的类
 struct Vehicle
 {
@@ -68,9 +70,11 @@ struct Vehicle
         x += (y < middleY) ? speed : -speed;
     }
     // 平滑变道函数
-    virtual bool smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehicles, function<int(int)> curveFunc=SUV_curve);
+    virtual bool smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehicles);
     // 获取安全距离（可被子类重写）
     virtual int getSafeDistance() const { return SAFE_DISTANCE; }
+    // 修改变道曲线函数为虚函数，允许子类重写
+    virtual float curveFunc(float t) const { return 3 * t * t - 2 * t * t * t; }
 };
 
 // 虚拟车辆类，用于轨迹预测和相交检测

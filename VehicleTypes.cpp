@@ -4,7 +4,6 @@
 Sedan::Sedan(int lane, int carlength, int carwidth, int x, int y, int speed)
     : Vehicle(lane, carlength, carwidth, x, y, speed) {}
 
-
 int Sedan::getSafeDistance() const
 {
     // 小轿车安全距离
@@ -76,7 +75,6 @@ void Sedan::draw() const
 // SUV类实现
 SUV::SUV(int lane, int carlength, int carwidth, int x, int y, int speed)
     : Vehicle(lane, carlength, carwidth, x, y, speed) {}
-
 
 int SUV::getSafeDistance() const
 {
