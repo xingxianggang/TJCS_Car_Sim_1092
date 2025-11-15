@@ -16,13 +16,12 @@ std::string EnvironmentConfig::toString() const {
 EnvironmentConfig BridgeTrafficController::getEnvironmentConfig(TimeOfDay time, WeatherCondition weather) {
     std::map<WeatherCondition, double> luxMap;
     if (time == TimeOfDay::Day) {
+        // 保留一种下雨类型（使用 ModerateRain 表示“一般雨天”）
         luxMap = {
             {WeatherCondition::Sunny, 100000.0},
             {WeatherCondition::Cloudy, 20000.0},
             {WeatherCondition::Overcast, 5000.0},
-            {WeatherCondition::LightRain, 2000.0},
-            {WeatherCondition::ModerateRain, 1500.0},
-            {WeatherCondition::HeavyRain, 500.0}
+            {WeatherCondition::ModerateRain, 1500.0}
         };
     }
     else {
