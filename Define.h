@@ -2,6 +2,6 @@
 // 定义安全距离和回调函数
 const int SAFE_DISTANCE = 150; // 安全距离（像素）
 const int CRASH_DISTANCE = 50; // 碰撞距离（像素）
-const int WAIT = 30;          // 等待速度差阈值
-const int CRASH = 80;        // 危险速度差阈值
+const int WAIT = 10;          // 等待速度差阈值
+const int CRASH = 110;        // 危险速度差阈值
 #pragma once

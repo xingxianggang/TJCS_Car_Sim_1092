@@ -222,7 +222,7 @@ int main()
             v->draw();  // 现在会调用正确的派生类draw()函数
         }
 
-        Sleep(60);
+        Sleep(40);
         time += 0.2;
     }
     closegraph();
