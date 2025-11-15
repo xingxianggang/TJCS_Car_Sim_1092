@@ -1,4 +1,5 @@
 #include <graphics.h>
+#include <graphics.h>
 #include <vector>
 #include <ctime>
 #include <conio.h> // 需要包含此头文件_kbhit()函数需要
@@ -60,7 +61,7 @@ struct Vehicle
     bool isLaneChangeSafe(int laneHeight, const vector<Vehicle *> &allVehicles) const;
 
     // 检查与前车距离
-    void checkFrontVehicleDistance(vector<Vehicle *> &allVehicles, int safeDistance);
+    void checkFrontVehicleDistance(vector<Vehicle *> &allVehicles,int safeDistance);
 
     // 显示闪烁的橘色线框
     void showFlashingFrame();
@@ -74,9 +75,13 @@ struct Vehicle
     // 平滑变道函数
     virtual bool smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehicles);
     // 获取安全距离（可被子类重写）
-    virtual int getSafeDistance() const { return SAFE_DISTANCE; }
+    virtual int getSafeDistance() const;
+
     // 修改变道曲线函数为虚函数，允许子类重写
     virtual float curveFunc(float t) const { return 3 * t * t - 2 * t * t * t; }
+
+    // 在车辆上方显示消息
+    void carmessage(const string& message) const;
 };
 
 // 虚拟车辆类，用于轨迹预测和相交检测

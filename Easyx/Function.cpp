@@ -1,4 +1,4 @@
-#include <graphics.h>
+﻿#include <graphics.h>
 #include <vector>
 #include <ctime>
 #include <conio.h> // 需要包含此头文件_kbhit()函数需要
@@ -11,17 +11,52 @@
 #include "Class.h"
 using namespace std;
 // 清除指定车道的所有车辆
-void clearLane(vector<Vehicle*>& vehicles, int lane) {
-    for (auto it = vehicles.begin(); it != vehicles.end(); ) {
-        if ((*it)->lane == lane) {
-            delete *it;  // 释放内存
-            it = vehicles.erase(it);  // 从vector中移除指针
+void clearLane(vector<Vehicle *> &vehicles, int lane)
+{
+    for (auto it = vehicles.begin(); it != vehicles.end();)
+    {
+        if ((*it)->lane == lane)
+        {
+            delete *it;              // 释放内存
+            it = vehicles.erase(it); // 从vector中移除指针
         }
-        else {
+        else
+        {
             ++it;
         }
     }
 }
+void Vehicle::carmessage(const string &message) const
+{
+    // 保存当前字体样式
+    LOGFONT oldFont;
+    gettextstyle(&oldFont);
+
+    // 设置新的字体样式
+    LOGFONT newFont = {0};
+    newFont.lfHeight = carwidth; // 字体高度与车辆宽度相关
+    newFont.lfWeight = FW_NORMAL;
+    wcscpy_s(newFont.lfFaceName, L"Arial");
+    newFont.lfQuality = ANTIALIASED_QUALITY;
+    settextstyle(&newFont);
+    wstring wideMessage;
+    wideMessage.assign(message.begin(), message.end());
+    // 设置文字颜色为车辆颜色的反色，确保可见性
+    COLORREF textColor = RGB(255 - GetRValue(color), 255 - GetGValue(color), 255 - GetBValue(color));
+    settextcolor(textColor);
+
+    // 计算文字显示位置（车辆上方居中）
+    int textWidth = textwidth(wideMessage.c_str());
+    int posX = x - textWidth / 2;
+    int posY = y - carlength / 2 - carwidth;
+
+    // 绘制文字
+    outtextxy(posX, posY, wideMessage.c_str());
+
+    // 恢复原有字体样式
+    settextstyle(&oldFont);
+}
+
 // 绘制虚线
 void drawDashedLine(int x1, int y1, int x2, int y2)
 {
@@ -93,12 +128,12 @@ bool VirtualVehicle::isTrajectoryIntersecting(const VirtualVehicle &other, int f
         int otherBottom = otherY + other.carwidth / 2;
 
         // 增加一个小的安全缓冲区（5像素），使检测更加保守
-        const int safetyBuffer = 5;
+        const int safetyBuffer = 0;
         myLeft -= safetyBuffer;
         myRight += safetyBuffer;
         myTop -= safetyBuffer;
         myBottom += safetyBuffer;
-        
+
         otherLeft -= safetyBuffer;
         otherRight += safetyBuffer;
         otherTop -= safetyBuffer;
@@ -183,5 +218,5 @@ int SUV_curve(int t)
 }
 int Truck_curve(int t)
 {
-    return 4* t* t* t; // 更慢的变道曲线
+    return 4 * t * t * t; // 更慢的变道曲线
 }

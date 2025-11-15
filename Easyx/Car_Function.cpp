@@ -1,4 +1,4 @@
-#include <graphics.h>
+﻿#include <graphics.h>
 #include <vector>
 #include <ctime>
 #include <conio.h>
@@ -17,9 +17,11 @@ using namespace std;
 // 平滑变道函数
 bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehicles)
 {
+    cout<<"正在平滑变道..."<<endl;
     // 如果车辆已抛锚，不能变道
     if (isBrokenDown)
     {
+        isGoing2change = false;
         return false;
     }
 
@@ -28,12 +30,15 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
         // 更新变道进度，基于车辆类型调整变道速度
         // 小轿车变道较快，卡车较慢
         float changeSpeed = 0.02f;
-        if (dynamic_cast<const Sedan*>(this)) {
-            changeSpeed = 0.025f;  // 小轿车变道稍快
-        } else if (dynamic_cast<const Truck*>(this)) {
-            changeSpeed = 0.015f;  // 卡车变道稍慢
+        if (dynamic_cast<const Sedan *>(this))
+        {
+            changeSpeed = 0.025f; // 小轿车变道稍快
         }
-        
+        else if (dynamic_cast<const Truck *>(this))
+        {
+            changeSpeed = 0.015f; // 卡车变道稍慢
+        }
+
         changeProgress += changeSpeed;
 
         if (changeProgress >= 1.0f)
@@ -43,8 +48,7 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
             isChangingLane = false;
             isGoing2change = false;
             lane = targetLane;
-            speed = speed * 2; // 恢复速度
-            
+
             // 清空轨迹点
             laneChangeTrajectory.clear();
             return true;
@@ -52,10 +56,11 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
 
         // 使用预计算的轨迹点更新车辆位置
         int trajectoryIndex = (int)(changeProgress * (laneChangeTrajectory.size() - 1));
-        if (trajectoryIndex >= laneChangeTrajectory.size()) {
+        if (trajectoryIndex >= laneChangeTrajectory.size())
+        {
             trajectoryIndex = laneChangeTrajectory.size() - 1;
         }
-        
+
         x = laneChangeTrajectory[trajectoryIndex].first;
         y = laneChangeTrajectory[trajectoryIndex].second;
 
@@ -80,21 +85,21 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
     // 预先计算整个变道轨迹点
     laneChangeTrajectory.clear();
     const int predictionSteps = 50; // 增加轨迹点数量以获得更平滑的移动
-    
+
     // 水平方向保持匀速运动
     int currentX = x;
     int targetX = x + (y < laneHeight * 3 ? 1 : -1) * abs(endX - startX); // 水平方向移动距离
     int deltaX = targetX - currentX;
-    
-    // 垂直方向目标位置
+
+    // 垂直方向目标位置 (考虑顶部面板高度偏移)
     int currentY = y;
-    int targetY = laneHeight * tempTargetLane + (int)(0.5 * laneHeight);
+    int targetY = 80 + laneHeight * tempTargetLane + (int)(0.5 * laneHeight); // 添加80像素的顶部面板偏移
     int deltaY = targetY - currentY;
-    
+
     // 水平方向速度保持不变
     int horizontalSpeed = (y < laneHeight * 3) ? speed : -speed;
     int totalHorizontalDistance = horizontalSpeed * 30; // 控制水平移动距离
-    
+
     for (int i = 0; i <= predictionSteps; ++i)
     {
         // 计算进度
@@ -102,7 +107,7 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
 
         // 水平方向匀速运动
         int newX = currentX + (int)(totalHorizontalDistance * t);
-        
+
         // 垂直方向使用贝塞尔曲线
         float verticalProgress = curveFunc(t);
         int newY = currentY + (int)(deltaY * verticalProgress);
@@ -115,7 +120,8 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
     VirtualVehicle virtualCar(x, y, carlength, carwidth);
 
     // 添加轨迹点用于碰撞检测
-    for (const auto& point : laneChangeTrajectory) {
+    for (const auto &point : laneChangeTrajectory)
+    {
         virtualCar.addTrajectoryPoint(point.first, point.second);
     }
 
@@ -169,19 +175,20 @@ bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehic
         }
 
         // 检查轨迹是否相交
-        if (virtualCar.isTrajectoryIntersecting(otherVirtual, predictionSteps))
-        {
-            isGoing2change = false; // 取消准备变道状态
-            laneChangeTrajectory.clear(); // 清空轨迹点
-            return false;           // 轨迹相交，变道不安全，取消变道
-        }
+        //if (virtualCar.isTrajectoryIntersecting(otherVirtual, predictionSteps))
+        //{
+        //    cout<<"变道失败"<<endl;
+        //    isGoing2change = false;       // 取消准备变道状态
+        //    laneChangeTrajectory.clear(); // 清空轨迹点
+        //    return false;                 // 轨迹相交，变道不安全，取消变道
+        //}
     }
 
     // 变道安全，设置参数
     targetLane = tempTargetLane;
     startX = x;
     startY = y;
-    endX = laneChangeTrajectory.back().first; // 使用轨迹的终点
+    endX = laneChangeTrajectory.back().first;  // 使用轨迹的终点
     endY = laneChangeTrajectory.back().second; // 使用轨迹的终点
 
     // 开始变道
@@ -276,7 +283,7 @@ bool Vehicle::isLaneChangeSafe(int laneHeight, const vector<Vehicle *> &allVehic
 
     int currentX = x;
     int currentY = y;
-    int targetY = laneHeight * target + (int)(0.5 * laneHeight);
+    int targetY = 80 + laneHeight * target + (int)(0.5 * laneHeight); // 添加80像素的顶部面板偏移
     int currentSpeed = (y < laneHeight * 3) ? speed : -speed;
     const int predictionSteps = 30; // 统一预测步数
 
@@ -358,8 +365,12 @@ bool Vehicle::isLaneChangeSafe(int laneHeight, const vector<Vehicle *> &allVehic
 }
 
 // 检查与前车距离
-void Vehicle::checkFrontVehicleDistance(vector<Vehicle *> &allVehicles, int safeDistance)
+void Vehicle::checkFrontVehicleDistance(vector<Vehicle *> &allVehicles,int safeDistance)
 {
+    if (isBrokenDown)
+    {
+        return;
+    }
     // 遍历所有车辆，寻找同一车道的前方车辆
     for (auto other : allVehicles)
     {
@@ -373,7 +384,7 @@ void Vehicle::checkFrontVehicleDistance(vector<Vehicle *> &allVehicles, int safe
 
         bool isMovingRight = (lane < 3);
         bool isFrontVehicle = false;
-        
+
         if (isMovingRight)
         {
             // 向右行驶，x坐标更大的车是前车
@@ -400,38 +411,30 @@ void Vehicle::checkFrontVehicleDistance(vector<Vehicle *> &allVehicles, int safe
             {
                 cout << "Relative Speed: " << relativeSpeed << endl;
             }
-            
+
             if (relativeSpeed <= WAIT)
             {
-                // 如果相对速度小于等于WAIT，将后车速度设为前车速度
-                if (relativeSpeed > WAIT / 2)
+                if (((*other).isBrokenDown))
                 {
-                    speed = speed - 5;
+                    isGoing2change = true;
                 }
                 else
                 {
-                    speed = (*other).speed;
+                    // 如果相对速度小于等于WAIT，将后车速度设为前车速度
+                    speed = speed - 15;
                 }
             }
-            if (relativeSpeed > WAIT && relativeSpeed <= CRASH)
+            else if ((relativeSpeed > WAIT) && (relativeSpeed <= CRASH))
             {
+                carmessage("trying");
+                cout << "尝试变道" << endl; 
                 isGoing2change = true;
-                if ((*other).speed != 0)
-                {
-                    speed = speed / 2;
-                }
             }
             return;
         }
         else if (distance <= CRASH_DISTANCE)
         {
             showFlashingFrame();
-            // 计算相对速度
-            int relativeSpeed = abs(speed - (*other).speed);
-            if (relativeSpeed != 0)
-            {
-                cout << "Relative Speed:CRASH " << relativeSpeed << endl;
-            }
             (*other).handleDangerousSituation();
             handleDangerousSituation();
             return;

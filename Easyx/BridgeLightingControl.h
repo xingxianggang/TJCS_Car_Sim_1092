@@ -1,10 +1,10 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 
-// ÌìÆøÄ£Ê½Ã¶¾Ù
+// å¤©æ°”æ¨¡å¼æšä¸¾
 enum WeatherMode { RAIN, SNOW, NOTHING };
 
-// ÌìÆøÌõ¼şÃ¶¾Ù
+// å¤©æ°”æ¡ä»¶æšä¸¾
 enum class WeatherCondition {
     Sunny,
     Cloudy,
@@ -18,13 +18,13 @@ enum class WeatherCondition {
     LitBridge
 };
 
-// Ê±¼ä¶ÎÃ¶¾Ù
+// æ—¶é—´æ®µæšä¸¾
 enum class TimeOfDay {
     Day,
     Night
 };
 
-// »·¾³ÅäÖÃ½á¹¹
+// ç¯å¢ƒé…ç½®ç»“æ„
 struct EnvironmentConfig {
     double illuminance_lux;
     double recommended_speed_kmh;
@@ -33,13 +33,13 @@ struct EnvironmentConfig {
     std::string toString() const;
 };
 
-// ÇÅÁº½»Í¨¿ØÖÆÆ÷Àà
+// æ¡¥æ¢äº¤é€šæ§åˆ¶å™¨ç±»
 class BridgeTrafficController {
 public:
     static EnvironmentConfig getEnvironmentConfig(TimeOfDay time, WeatherCondition weather);
 };
 
-// ÌìÆøĞ§¹û¹ÜÀíÆ÷Àà
+// å¤©æ°”æ•ˆæœç®¡ç†å™¨ç±»
 class WeatherEffectManager {
 private:
     static const int RAIN_COUNT = 250;
@@ -60,5 +60,5 @@ public:
     ~WeatherEffectManager();
     void setWeather(WeatherMode mode);
     WeatherMode getCurrentWeather() const { return currentWeather; }
-    void update();  // ¸üĞÂ²¢»æÖÆÌìÆøĞ§¹û
+    void update();  // æ›´æ–°å¹¶ç»˜åˆ¶å¤©æ°”æ•ˆæœ
 };
