@@ -1,0 +1,4 @@
+VehicleType,Count,Probability
+Sedan,1,0.3333
+SUV,1,0.3333
+Truck,1,0.3333
