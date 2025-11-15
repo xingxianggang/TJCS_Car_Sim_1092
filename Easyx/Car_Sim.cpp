@@ -13,6 +13,7 @@
 #include "VehicleTypes.h"
 #include "BridgeLightingControl.h"
 #include "Define.h"
+#include "VehicleStatistics.h"
 using namespace std;
 
 // 车辆生成频率控制变量（数值越小生成越频繁，1表示每次循环都尝试生成）
@@ -45,6 +46,9 @@ int main()
     vector<Vehicle *> vehicles;
     srand((unsigned int)time(0));
     double time = 0;
+
+    // 初始化车辆统计对象
+    VehicleStatistics vehicleStats;
 
     normal_distribution<> normalwidth(3, 0.1);
     normal_distribution<> normallength(6, 0.1);
@@ -365,6 +369,10 @@ int main()
         {
             drawUI(weatherManager);
         }
+
+        // 检查参数是否改变并记录统计数据
+        vehicleStats.checkAndRecordParameters(time, safeDistance, stoppingSpeed, vehicles);
+
         // 生成新车（生成 X 坐标限制在 roadWidth 范围内，不会在控制栏生成）
         // 根据vehicleGenerationFrequency值控制生成频率
         if (rand() % vehicleGenerationFrequency == 0)
@@ -432,6 +440,8 @@ int main()
                 if (newVehicle)
                 {
                     vehicles.push_back(newVehicle);
+                    // 记录生成的车辆类型
+                    vehicleStats.recordVehicle(newVehicle);
                 }
             }
         }
@@ -567,6 +577,9 @@ int main()
         delete v;
     }
     vehicles.clear();
+
+    // 保存统计数据
+    vehicleStats.saveAllStatistics();
 
     closegraph();
     return 0;
