@@ -83,6 +83,12 @@ int main()
     const int ctrlBtnHeight = 25;
     const int ctrlBtnSpacing = 5;
 
+    // 退出按钮参数
+    const int exitBtnWidth = 60;
+    const int exitBtnHeight = 30;
+    const int exitBtnX = windowWidth - exitBtnWidth - 10; // 距离右边10像素
+    const int exitBtnY = (topBarHeight - exitBtnHeight) / 2; // 垂直居中
+
     // 频率控制按钮位置
     const int freqCtrlStartX = 10;
     const int freqCtrlStartY = 10;
@@ -116,6 +122,20 @@ int main()
         setlinecolor(RGB(80, 80, 80));
         fillrectangle(0, 0, windowWidth, topBarHeight);
         rectangle(0, 0, windowWidth, topBarHeight);
+
+        // 绘制退出按钮
+        setfillcolor(RGB(180, 70, 70)); // 红色
+        setlinecolor(WHITE);
+        fillrectangle(exitBtnX, exitBtnY, exitBtnX + exitBtnWidth, exitBtnY + exitBtnHeight);
+        rectangle(exitBtnX, exitBtnY, exitBtnX + exitBtnWidth, exitBtnY + exitBtnHeight);
+
+        settextstyle(16, 0, L"Arial");
+        settextcolor(WHITE);
+        setbkmode(TRANSPARENT);
+        const wchar_t* exitText = L"退出";
+        int textW = textwidth(exitText);
+        int textH = textheight(exitText);
+        outtextxy(exitBtnX + (exitBtnWidth - textW) / 2, exitBtnY + (exitBtnHeight - textH) / 2, exitText);
 
         // 在右侧绘制独立的竖直控制栏背景（从 topBarHeight 开始）
         setfillcolor(RGB(50, 50, 50));
@@ -298,6 +318,13 @@ int main()
             MOUSEMSG msg = GetMouseMsg();
             if (msg.uMsg == WM_LBUTTONDOWN)
             {
+                // 检查是否点击退出按钮
+                if (msg.x >= exitBtnX && msg.x <= exitBtnX + exitBtnWidth &&
+                    msg.y >= exitBtnY && msg.y <= exitBtnY + exitBtnHeight)
+                {
+                    running = false;
+                }
+
                 // 检查是否点击右侧控制栏中的车道清除按钮
                 if (msg.x >= roadWidth && msg.x <= windowWidth)
                 {

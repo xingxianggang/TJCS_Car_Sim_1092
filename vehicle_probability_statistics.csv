@@ -1,4 +1,4 @@
 VehicleType,Count,Probability
-Sedan,1,0.3333
-SUV,1,0.3333
-Truck,1,0.3333
+Sedan,5,0.2941
+SUV,4,0.2353
+Truck,8,0.4706

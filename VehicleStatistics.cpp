@@ -66,7 +66,7 @@ void VehicleStatistics::checkAndRecordParameters(double time, int safeDist, int 
 
 void VehicleStatistics::saveVehicleProbabilityStatistics() const
 {
-    std::ofstream file("./vehicle_probability_statistics.csv");
+    std::ofstream file("./log/vehicle_probability_statistics.csv");
     if (!file.is_open())
     {
         std::cerr << "无法创建车辆概率统计文件!" << std::endl;
@@ -101,7 +101,7 @@ void VehicleStatistics::saveVehicleProbabilityStatistics() const
 
 void VehicleStatistics::saveBreakdownRateStatistics() const
 {
-    std::ofstream file("./breakdown_rate_statistics.csv");
+    std::ofstream file("./log/breakdown_rate_statistics.csv");
     if (!file.is_open())
     {
         std::cerr << "无法创建故障率统计文件!" << std::endl;
