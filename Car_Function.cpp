@@ -1,4 +1,4 @@
-﻿#include <graphics.h>
+#include <graphics.h>
 #include <vector>
 #include <ctime>
 #include <conio.h>
@@ -516,8 +516,22 @@ void Vehicle::showFlashingFrame(bool isAttempting)
 
     setlinestyle(PS_SOLID, 2);
 
-    rectangle(x - carlength / 2 - 5, y - carwidth / 2 - 5,
-              x + carlength / 2 + 5, y + carwidth / 2 + 5);
+    // 获取窗口宽度和控制栏宽度
+    int windowWidth = getwidth();
+    const int controlBarWidth = 60;
+    int rightLimit = windowWidth - controlBarWidth;
+
+    // 检查车辆是否接近或进入控制栏区域
+    if (x + carlength / 2 + 5 <= rightLimit) {
+        // 车辆完全在控制栏左侧，正常绘制
+        rectangle(x - carlength / 2 - 5, y - carwidth / 2 - 5,
+                  x + carlength / 2 + 5, y + carwidth / 2 + 5);
+    } else if (x - carlength / 2 - 5 < rightLimit) {
+        // 车辆部分进入控制栏区域，只绘制未进入控制栏的部分
+        rectangle(x - carlength / 2 - 5, y - carwidth / 2 - 5,
+                  rightLimit, y + carwidth / 2 + 5);
+    }
+    // 如果车辆完全在控制栏内，则不绘制任何框
 
     setlinestyle(oldLineStyle.style, oldLineStyle.thickness);
     setlinecolor(oldLineColor);

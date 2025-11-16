@@ -96,7 +96,7 @@ int main()
     // 退出按钮参数
     const int exitBtnWidth = 60;
     const int exitBtnHeight = 30;
-    const int exitBtnX = windowWidth - exitBtnWidth - 10; // 距离右边10像素
+    const int exitBtnX = windowWidth - exitBtnWidth - 10;    // 距离右边10像素
     const int exitBtnY = (topBarHeight - exitBtnHeight) / 2; // 垂直居中
 
     // 频率控制按钮位置
@@ -133,15 +133,15 @@ int main()
     };
 
     TimeButtonRect timeButtons[2] = {
-        { timeBtnStartX, timeBtnStartY, timeBtnStartX + timeBtnWidth, timeBtnStartY + timeBtnHeight, TimeOfDay::Day, L"白天" },
-        { timeBtnStartX + timeBtnWidth + timeBtnSpacing, timeBtnStartY, timeBtnStartX + 2 * timeBtnWidth + timeBtnSpacing, timeBtnStartY + timeBtnHeight, TimeOfDay::Night, L"黑夜" }
-    };
+        {timeBtnStartX, timeBtnStartY, timeBtnStartX + timeBtnWidth, timeBtnStartY + timeBtnHeight, TimeOfDay::Day, L"白天"},
+        {timeBtnStartX + timeBtnWidth + timeBtnSpacing, timeBtnStartY, timeBtnStartX + 2 * timeBtnWidth + timeBtnSpacing, timeBtnStartY + timeBtnHeight, TimeOfDay::Night, L"黑夜"}};
 
     // 当前环境照度（lux），用于 UI 显示与 safeDistance 计算
     double currentIlluminance = 0.0;
 
     // 绘制 UI 的 lambda（只绘制 top bar + right control bar + 按钮）
-    auto drawUI = [&](WeatherEffectManager &wm) {
+    auto drawUI = [&](WeatherEffectManager &wm)
+    {
         // 顶部横条（覆盖全宽）
         setfillcolor(RGB(40, 40, 40));
         setlinecolor(RGB(80, 80, 80));
@@ -158,7 +158,7 @@ int main()
         settextstyle(16, 0, L"Arial");
         settextcolor(WHITE);
         setbkmode(TRANSPARENT);
-        const wchar_t* exitText = L"退出";
+        const wchar_t *exitText = L"退出";
         int textW = textwidth(exitText);
         int textH = textheight(exitText);
         outtextxy(exitBtnX + (exitBtnWidth - textW) / 2, exitBtnY + (exitBtnHeight - textH) / 2, exitText);
@@ -172,7 +172,7 @@ int main()
         // 桥的参数信息（顶部 bar 左侧）
         wchar_t info[256];
         swprintf_s(info, L"桥长： %.0fm  桥宽：%.0fm  桥宽放大率： %.1f",
-               bridge.bridgeLength, bridge.bridgeWidth, bridge.widthScale);
+                   bridge.bridgeLength, bridge.bridgeWidth, bridge.widthScale);
         settextstyle(20, 0, L"Arial");
         settextcolor(WHITE);
         setbkmode(TRANSPARENT);
@@ -229,10 +229,13 @@ int main()
         for (int i = 0; i < 2; ++i)
         {
             bool isActive = (timeButtons[i].time == currentTime);
-            if (isActive) {
+            if (isActive)
+            {
                 setfillcolor(RGB(0, 120, 215));
                 setlinecolor(RGB(0, 84, 153));
-            } else {
+            }
+            else
+            {
                 setfillcolor(RGB(70, 70, 70));
                 setlinecolor(RGB(200, 200, 200));
             }
@@ -248,42 +251,42 @@ int main()
         setfillcolor(RGB(70, 70, 180));
         setlinecolor(WHITE);
         fillrectangle(freqCtrlStartX, freqCtrlStartY,
-                  freqCtrlStartX + ctrlBtnWidth, freqCtrlStartY + ctrlBtnHeight);
+                      freqCtrlStartX + ctrlBtnWidth, freqCtrlStartY + ctrlBtnHeight);
         rectangle(freqCtrlStartX, freqCtrlStartY,
-              freqCtrlStartX + ctrlBtnWidth, freqCtrlStartY + ctrlBtnHeight);
+                  freqCtrlStartX + ctrlBtnWidth, freqCtrlStartY + ctrlBtnHeight);
 
         // 频率减少按钮（修正 rectangle 参数为四个）
         setfillcolor(RGB(70, 180, 70));
         fillrectangle(freqCtrlStartX + ctrlBtnWidth + ctrlBtnSpacing, freqCtrlStartY,
-                  freqCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, freqCtrlStartY + ctrlBtnHeight);
+                      freqCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, freqCtrlStartY + ctrlBtnHeight);
         rectangle(freqCtrlStartX + ctrlBtnWidth + ctrlBtnSpacing, freqCtrlStartY,
-              freqCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, freqCtrlStartY + ctrlBtnHeight);
+                  freqCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, freqCtrlStartY + ctrlBtnHeight);
 
         setfillcolor(RGB(180, 70, 70));
         fillrectangle(distCtrlStartX, distCtrlStartY,
-                  distCtrlStartX + ctrlBtnWidth, distCtrlStartY + ctrlBtnHeight);
+                      distCtrlStartX + ctrlBtnWidth, distCtrlStartY + ctrlBtnHeight);
         rectangle(distCtrlStartX, distCtrlStartY,
-              distCtrlStartX + ctrlBtnWidth, distCtrlStartY + ctrlBtnHeight);
+                  distCtrlStartX + ctrlBtnWidth, distCtrlStartY + ctrlBtnHeight);
 
         // 安全距离减少按钮（修正 rectangle 参数）
         setfillcolor(RGB(180, 180, 70));
         fillrectangle(distCtrlStartX + ctrlBtnWidth + ctrlBtnSpacing, distCtrlStartY,
-                  distCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, distCtrlStartY + ctrlBtnHeight);
+                      distCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, distCtrlStartY + ctrlBtnHeight);
         rectangle(distCtrlStartX + ctrlBtnWidth + ctrlBtnSpacing, distCtrlStartY,
-              distCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, distCtrlStartY + ctrlBtnHeight);
+                  distCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, distCtrlStartY + ctrlBtnHeight);
 
         setfillcolor(RGB(70, 180, 180));
         fillrectangle(stopSpeedCtrlStartX, stopSpeedCtrlStartY,
-                  stopSpeedCtrlStartX + ctrlBtnWidth, stopSpeedCtrlStartY + ctrlBtnHeight);
+                      stopSpeedCtrlStartX + ctrlBtnWidth, stopSpeedCtrlStartY + ctrlBtnHeight);
         rectangle(stopSpeedCtrlStartX, stopSpeedCtrlStartY,
-              stopSpeedCtrlStartX + ctrlBtnWidth, stopSpeedCtrlStartY + ctrlBtnHeight);
+                  stopSpeedCtrlStartX + ctrlBtnWidth, stopSpeedCtrlStartY + ctrlBtnHeight);
 
         // 停止速度减少按钮（修正 rectangle 参数）
         setfillcolor(RGB(180, 70, 180));
         fillrectangle(stopSpeedCtrlStartX + ctrlBtnWidth + ctrlBtnSpacing, stopSpeedCtrlStartY,
-                  stopSpeedCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, stopSpeedCtrlStartY + ctrlBtnHeight);
+                      stopSpeedCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, stopSpeedCtrlStartY + ctrlBtnHeight);
         rectangle(stopSpeedCtrlStartX + ctrlBtnWidth + ctrlBtnSpacing, stopSpeedCtrlStartY,
-              stopSpeedCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, stopSpeedCtrlStartY + ctrlBtnHeight);
+                  stopSpeedCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing, stopSpeedCtrlStartY + ctrlBtnHeight);
 
         settextstyle(14, 0, L"Arial");
         settextcolor(WHITE);
@@ -302,7 +305,6 @@ int main()
         swprintf_s(statusText, L"生成频率:%d 探测距离:%d 减速度:%d 照度: %.2f lux", vehicleGenerationFrequency, safeDistance, stoppingSpeed, currentIlluminance);
         outtextxy(stopSpeedCtrlStartX + 2 * ctrlBtnWidth + ctrlBtnSpacing + 10, stopSpeedCtrlStartY + 5, statusText);
         // 显示流明（照度）在顶部 bar（靠近时间左侧）
-
 
         // 右侧抛锚清除按钮
         int laneCount = 6;
@@ -326,21 +328,27 @@ int main()
     };
 
     // Helper: 将 WeatherMode + currentTime 映射到 BridgeLightingControl::WeatherCondition
-    auto mapToWeatherCondition = [&](WeatherMode wm, TimeOfDay tod) -> WeatherCondition {
-        if (wm == RAIN) {
+    auto mapToWeatherCondition = [&](WeatherMode wm, TimeOfDay tod) -> WeatherCondition
+    {
+        if (wm == RAIN)
+        {
             return (tod == TimeOfDay::Day) ? WeatherCondition::Rain : WeatherCondition::RainNight;
         }
-        else if (wm == SNOW) {
+        else if (wm == SNOW)
+        {
             return (tod == TimeOfDay::Day) ? WeatherCondition::Snow : WeatherCondition::SnowNight;
         }
-        else { // NOTHING
+        else
+        { // NOTHING
             return (tod == TimeOfDay::Day) ? WeatherCondition::Sunny : WeatherCondition::SunnyNight;
         }
     };
 
     // Helper: 根据天气与时间从 BridgeLightingControl 获取环境配置，并设置 safeDistance 与 stoppingSpeed
-    auto applyWeatherToSafety = [&](WeatherMode wm, TimeOfDay tod) {
-        try {
+    auto applyWeatherToSafety = [&](WeatherMode wm, TimeOfDay tod)
+    {
+        try
+        {
             WeatherCondition cond = mapToWeatherCondition(wm, tod);
             double illuminance_lux = BridgeTrafficController::getEnvironmentConfig(tod, cond);
 
@@ -355,42 +363,58 @@ int main()
             // 白天雨天 (20000 lux)  -> 中等偏上可视距离
             // 夜晚雪天 (2000 lux)   -> 很低可视距离
             // 白天雪天 (60000 lux)  -> 中等偏上可视距离
-            
+
             double scaledMeters;
-            if (illuminance_lux >= 100000.0) {
+            if (illuminance_lux >= 100000.0)
+            {
                 // 白天晴天 - 最佳能见度
                 scaledMeters = 1200.0;
-            } else if (illuminance_lux >= 60000.0) {
+            }
+            else if (illuminance_lux >= 60000.0)
+            {
                 // 白天雪天 - 中等能见度
                 scaledMeters = 400.0;
-            } else if (illuminance_lux >= 20000.0) {
+            }
+            else if (illuminance_lux >= 20000.0)
+            {
                 // 白天雨天 - 良好能见度
                 scaledMeters = 800.0;
-            } else if (illuminance_lux >= 10000.0) {
+            }
+            else if (illuminance_lux >= 10000.0)
+            {
                 // 夜晚晴天 - 中等偏低能见度
                 scaledMeters = 200.0;
-            } else if (illuminance_lux >= 6000.0) {
+            }
+            else if (illuminance_lux >= 6000.0)
+            {
                 // 夜晚雨天 - 低能见度
                 scaledMeters = 100.0;
-            } else {
+            }
+            else
+            {
                 // 夜晚雪天 - 极低能见度
                 scaledMeters = 50.0;
             }
 
-            
             safeDistance = scaledMeters;
 
             // stoppingSpeed 仅受天气影响（白天/夜晚不影响减速度）
             const int baseStopping = 15;
-            if (wm == NOTHING) {
+            if (wm == NOTHING)
+            {
                 stoppingSpeed = baseStopping;
-            } else if (wm == RAIN) {
+            }
+            else if (wm == RAIN)
+            {
                 stoppingSpeed = max(1, (int)(baseStopping * 0.8));
-            } else { // SNOW
+            }
+            else
+            { // SNOW
                 stoppingSpeed = max(1, (int)(baseStopping * 0.6));
             }
         }
-        catch (...) {
+        catch (...)
+        {
             // 若获取环境配置失败，不改变现有值
         }
 
@@ -406,9 +430,12 @@ int main()
     while (running)
     {
         // 只清除并重绘“道路区域”（不清空 UI bar），以避免按钮响应问题
-        if (currentTime == TimeOfDay::Day) {
+        if (currentTime == TimeOfDay::Day)
+        {
             setfillcolor(RGB(100, 100, 100)); // 柏油路浅灰
-        } else {
+        }
+        else
+        {
             setfillcolor(BLACK);
         }
         fillrectangle(0, topBarHeight, roadWidth, windowHeight);
@@ -465,7 +492,8 @@ int main()
                 }
 
                 // 时间按钮（白天/黑夜）
-                for (int i = 0; i < 2; ++i) {
+                for (int i = 0; i < 2; ++i)
+                {
                     if (msg.x >= timeButtons[i].x1 && msg.x <= timeButtons[i].x2 &&
                         msg.y >= timeButtons[i].y1 && msg.y <= timeButtons[i].y2)
                     {
@@ -542,65 +570,45 @@ int main()
             // 向左行驶的车辆从 roadWidth 内侧开始，避免出现在 controlBar 上
             int newX = (lane < 3) ? (-carlength / 2 - 5) : (roadWidth - carlength / 2 - 1);
             int newY = topBarHeight + laneHeight * lane + (int)(0.5 * laneHeight);
-            bool isPositionSafe = true;
+            int vehicleType = rand() % 3;
+            Vehicle *newVehicle = nullptr;
 
-            for (const auto &existingVehicle : vehicles)
+            if (vehicleType == 0)
             {
-                if (existingVehicle->lane != lane)
-                    continue;
-
-                int distance = abs(existingVehicle->x - newX) -
-                               (existingVehicle->carlength / 2 + carlength / 2);
-
-                if (distance < safeDistance)
-                {
-                    isPositionSafe = false;
-                    break;
-                }
+                newVehicle = new Sedan(
+                    lane,
+                    carlength,
+                    carwidth,
+                    newX,
+                    newY,
+                    (int)rng.generate());
+            }
+            else if (vehicleType == 1)
+            {
+                newVehicle = new SUV(
+                    lane,
+                    carlength,
+                    carwidth,
+                    newX,
+                    newY,
+                    (int)rng.generate());
+            }
+            else
+            {
+                newVehicle = new Truck(
+                    lane,
+                    carlength,
+                    carwidth,
+                    newX,
+                    newY,
+                    (int)rng.generate());
             }
 
-            if (isPositionSafe)
+            if (newVehicle)
             {
-                int vehicleType = rand() % 3;
-                Vehicle *newVehicle = nullptr;
-
-                if (vehicleType == 0)
-                {
-                    newVehicle = new Sedan(
-                        lane,
-                        carlength,
-                        carwidth,
-                        newX,
-                        newY,
-                        (int)rng.generate());
-                }
-                else if (vehicleType == 1)
-                {
-                    newVehicle = new SUV(
-                        lane,
-                        carlength,
-                        carwidth,
-                        newX,
-                        newY,
-                        (int)rng.generate());
-                }
-                else
-                {
-                    newVehicle = new Truck(
-                        lane,
-                        carlength,
-                        carwidth,
-                        newX,
-                        newY,
-                        (int)rng.generate());
-                }
-
-                if (newVehicle)
-                {
-                    vehicles.push_back(newVehicle);
-                    // 记录生成的车辆类型
-                    vehicleStats.recordVehicle(newVehicle);
-                }
+                vehicles.push_back(newVehicle);
+                // 记录生成的车辆类型
+                vehicleStats.recordVehicle(newVehicle);
             }
         }
 
@@ -614,7 +622,10 @@ int main()
         {
             COLORREF originalColor = v->color;
             v->checkFrontVehicleDistance(vehicles, safeDistance, laneHeight);
-
+            if ((*v).speed < 0)
+            {
+                (*v).speed = 20;
+            }
             if (v->speed == 0)
             {
                 v->handleDangerousSituation();
@@ -685,7 +696,8 @@ int main()
             // 在屏幕最左侧绘制车道方向箭头（考虑到顶部横条）
             settextcolor(WHITE);
             setbkmode(TRANSPARENT);
-            for (int i = 0; i < laneCount; ++i) {
+            for (int i = 0; i < laneCount; ++i)
+            {
                 settextstyle((int)(laneHeight / 2), 0, L"Arial");
                 int arrowY = topBarHeight + laneHeight * i + (int)(0.5 * laneHeight) - (int)(laneHeight / 4);
                 outtextxy(5, arrowY, i < laneCount / 2 ? L"→" : L"←");

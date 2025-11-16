@@ -101,15 +101,15 @@ void WeatherEffectManager::update()
                 snow[i].x = rand() % windowWidth;
             }
             
-            if (snow[i].y < 90) {
-                snow[i].y = 90; // 确保雪花不会进入菜单栏区域
+            if (snow[i].y < 85) {
+                snow[i].y = 85; // 确保雪花不会进入菜单栏区域
             }
 
             if (snow[i].x < 0) snow[i].x = 0;
-            if (snow[i].x > windowWidth) snow[i].x = windowWidth;
+            if (snow[i].x > windowWidth-5) snow[i].x = windowWidth-5;
 
             // 只在道路区域绘制雪花，避开顶部菜单栏
-            if (snow[i].y >= 90) {
+            if (snow[i].y >= 85) {
                 fillcircle((int)snow[i].x, (int)snow[i].y, 2);
             }
         }
