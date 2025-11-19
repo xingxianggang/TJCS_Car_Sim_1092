@@ -36,6 +36,41 @@ enum class TimeOfDay
     Night
 };
 
+// 虚拟车辆类，用于轨迹预测和相交检测
+struct VirtualVehicle
+{
+    int x, y;
+    int carlength, carwidth;
+    std::vector<std::pair<int, int>> trajectory; // 轨迹点集合
+
+    VirtualVehicle(int startX, int startY, int length, int width)
+        : x(startX), y(startY), carlength(length), carwidth(width) {}
+
+    // 添加轨迹点
+    void addTrajectoryPoint(int pointX, int pointY)
+    {
+        trajectory.push_back(std::make_pair(pointX, pointY));
+    }
+    
+    // 检查两个虚拟车辆的轨迹是否相交
+    bool isTrajectoryIntersecting(const VirtualVehicle& other, int predictionSteps) const
+    {
+        // 简化实现：检查轨迹点是否重叠
+        for (const auto& point1 : trajectory) {
+            for (const auto& point2 : other.trajectory) {
+                // 检查两点间距离是否小于车辆宽度之和的一半（简化碰撞检测）
+                int dx = point1.first - point2.first;
+                int dy = point1.second - point2.second;
+                int distance = sqrt(dx * dx + dy * dy);
+                if (distance < (carwidth + other.carwidth) / 2) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
 struct Vehicle
 {
     int lane, carlength, carwidth, x, y, speed;
@@ -59,6 +94,8 @@ struct Vehicle
     int startY;           // 变道起始Y坐标
     int endX;             // 变道结束X坐标
     int endY;             // 变道结束Y坐标
+    // 预计算的变道轨迹点
+    std::vector<std::pair<int, int>> laneChangeTrajectory; // 变道轨迹点集合
 
     // 距离警告相关成员
     bool isTooClose;      // 是否距离前车过近
@@ -68,30 +105,55 @@ struct Vehicle
     bool isBrokenDown; // 车辆是否抛锚
 
     virtual void draw(QPainter &painter) const = 0;
+    
+    // 预测并绘制轨迹
+    void predictAndDrawTrajectory(QPainter &painter, int laneHeight, int middleY, int roadWidth, const std::vector<Vehicle *> &allVehicles) const;
 
     // 前向运动函数
     void moveForward(int middleY)
     {
         x += (y < middleY) ? speed : -speed;
     }
+
+    // 计算车辆之间的距离
+    int calculateDistance(const Vehicle *other, int middleY) const;
+
+    // 平滑变道函数
+    bool smoothLaneChange(int laneHeight, const std::vector<Vehicle *> &allVehicles);
+    virtual int getSafeDistance() const;
+    
+    // 修改变道曲线函数为虚函数，允许子类重写
+    virtual float curveFunc(float t) const { return 3 * t * t - 2 * t * t * t; }
+    
+    // 检查前车距离并处理跟随转向
+    void checkFrontVehicleDistance(std::vector<Vehicle *> &allVehicles, int safeDistance, int laneHeight, int stoppingSpeed);
+    
+    // 显示闪烁框（用于警告或变道提示）
+    void showFlashingFrame(QPainter &painter, int roadWidth, bool isAttempting = false) const;
+    
+    // 处理危险情况（碰撞）
+    void handleDangerousSituation();
 };
 
 struct Sedan : public Vehicle
 {
     Sedan(int lane, int carlength, int carwidth, int x, int y, int speed);
     void draw(QPainter &painter) const override;
+    int getSafeDistance() const; // 获取安全距离
 };
 
 struct SUV : public Vehicle
 {
     SUV(int lane, int carlength, int carwidth, int x, int y, int speed);
     void draw(QPainter &painter) const override;
+    int getSafeDistance() const; // 获取安全距离
 };
 
 struct Truck : public Vehicle
 {
     Truck(int lane, int carlength, int carwidth, int x, int y, int speed);
     void draw(QPainter &painter) const override;
+    int getSafeDistance() const; // 获取安全距离
 };
 
 struct Bridge
