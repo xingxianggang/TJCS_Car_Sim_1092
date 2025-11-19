@@ -13,6 +13,7 @@
 #include "Define.h"
 #include "VehicleTypes.h"
 using namespace std;
+333333
 
 // 平滑变道函数
 bool Vehicle::smoothLaneChange(int laneHeight, const vector<Vehicle *> &allVehicles)
